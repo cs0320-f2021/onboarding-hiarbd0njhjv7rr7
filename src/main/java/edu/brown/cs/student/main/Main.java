@@ -67,9 +67,24 @@ public final class Main {
         try {
           input = input.trim();
           String[] arguments = input.split(" ");
-          System.out.println(arguments[0]);
+          // System.out.println(arguments[0]);
           // TODO: complete your REPL by adding commands for addition "add" and subtraction
           //  "subtract"
+          if (arguments.length != 3){
+            System.out.println("Invalid number of inputs.");
+          }
+          switch (arguments[0]) {
+            case "add":
+              String add_res = processAdd(arguments[1], arguments[2]);
+              System.out.println(add_res);
+              break;
+            case "subtract":  
+              String sub_res = processSubtract(arguments[1], arguments[2]);
+              System.out.println(sub_res);
+              break;
+            default: 
+              System.out.println("ERROR: We couldn't process your input");
+          }
         } catch (Exception e) {
           // e.printStackTrace();
           System.out.println("ERROR: We couldn't process your input");
@@ -80,6 +95,36 @@ public final class Main {
       System.out.println("ERROR: Invalid input for REPL");
     }
 
+  }
+
+  private static String processAdd(String str1, String str2) {
+    Double dbl1;
+    Double dbl2;
+    MathBot mb = new MathBot();
+    try {
+      dbl1 = Double.parseDouble(str1);
+      dbl2 = Double.parseDouble(str2);
+      } catch (Exception e) {
+        throw new IllegalArgumentException("weewoo");
+        // e.printStackTrace();
+      }
+    Double res = mb.add(dbl1, dbl2);
+    return Double.toString(res);
+  }
+
+  private static String processSubtract(String str1, String str2) {
+    Double dbl1;
+    Double dbl2;
+    MathBot mb = new MathBot();
+    try {
+      dbl1 = Double.parseDouble(str1);
+      dbl2 = Double.parseDouble(str2);
+      } catch (Exception e) {
+        throw new IllegalArgumentException("weewoo");
+        // e.printStackTrace();
+      }
+    Double res = mb.subtract(dbl1, dbl2);
+    return Double.toString(res);
   }
 
   private static FreeMarkerEngine createEngine() {
