@@ -15,8 +15,11 @@ Project details
 
 ## Description
 
-Project description (for final projects)
-Team members and contributions (include cs logins)
+Supports two commands: 
+
+## stars <filename>
+Loads data containing star information from a CSV file, specified by <filename>,
+
 ## Contributors
 Aaron Jeyaraj (ajeyaraj)
 
