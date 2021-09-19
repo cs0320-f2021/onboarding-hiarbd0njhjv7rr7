@@ -28,4 +28,10 @@ public class MathBotTest {
   }
 
   // TODO: add more unit tests of your own
+
+  public void testMultiple() {
+    MathBot matherator9002 = new MathBot();
+    double output = matherator9002.subtract(18, 17);
+    assertEquals(1, output, 0.01);
+  }
 }
