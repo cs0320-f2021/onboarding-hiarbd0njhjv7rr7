@@ -10,8 +10,6 @@ import java.io.StringWriter;
 import java.io.FileNotFoundException;
 import java.util.*;
 
-//import java
-
 import com.google.common.collect.ImmutableMap;
 
 import freemarker.template.Configuration;
@@ -67,19 +65,17 @@ public final class Main {
       runSparkServer((int) options.valueOf("port"));
     }
 
-    // TODO: Add your REPL here!
     try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
       String input;
       while ((input = br.readLine()) != null) {
         try {
           input = input.trim();
           String[] arguments = input.split(" ");
-          // System.out.println(arguments[0]);
-          // TODO: complete your REPL by adding commands for addition "add" and subtraction
-          //  "subtract"
+          // Switch on first argument to command line (i.e. command user wishes to run)
+          // Call helper functions to deal with each case accordingly
           switch (arguments[0]) {
             case "add":
-              if (arguments.length != 3){
+              if (arguments.length != 3) {
                 System.out.println("ERROR:");
               } else {
                 String add_res = processAdd(arguments[1], arguments[2]);
@@ -87,7 +83,7 @@ public final class Main {
               }
               break;
             case "subtract":
-              if (arguments.length != 3){
+              if (arguments.length != 3) {
                 System.out.println("Invalid number of inputs.");
               } else {
                 String sub_res = processSubtract(arguments[1], arguments[2]);
@@ -100,11 +96,11 @@ public final class Main {
             case "naive_neighbors":
               processNaiveNeighbours(arguments);
               break;
-            default: 
+            default:
               System.out.println("ERROR: We couldn't process your input");
           }
         } catch (Exception e) {
-           e.printStackTrace();
+          e.printStackTrace();
           System.out.println("ERROR: We couldn't process your input");
         }
       }
@@ -115,24 +111,42 @@ public final class Main {
 
   }
 
-  private void processStars(String[] arguments){
-    if (arguments.length != 2){
+  /**
+   * processStars is called when the user supplies the 'stars'
+   * command to the REPL, and takes in the arguments array
+   *
+   * @param arguments - the arguments supplied by the user to the 'stars'
+   *                  command
+   */
+  private void processStars(String[] arguments) {
+    if (arguments.length != 2) {
       System.out.println("Invalid number of inputs.");
     } else {
       try {
         this.stars = new StarList(arguments[1]);
-      } catch (IllegalArgumentException e){
+      } catch (IllegalArgumentException e) {
         System.out.println("Bad file.");
       }
     }
   }
 
-  private void processNaiveNeighbours(String[] arguments){
+  /**
+   * processNaiveNeighbours is called when the user supplies the 'naive_neighbors'
+   * command to the REPL, and takes in arguments array
+   *
+   * @param arguments - the arguments supplied by the user to the 'naive_neighbors'
+   *                  command
+   */
+  private void processNaiveNeighbours(String[] arguments) {
 
+    // We must have at least two arguments supplied to the naive_neighbours
+    // (k and words in name of star)
     if (arguments.length < 3) {
       System.out.println("Invalid number of inputs.");
     } else {
       Star[] res = null;
+      // If the second argument to naive_neighbors starts with quote, user is
+      // supplying a name of a star, join with other words in array
       if (arguments[2].startsWith("\"")) {
         try {
           int k;
@@ -141,11 +155,11 @@ public final class Main {
           k = Integer.parseInt(arguments[1]);
           res = this.stars.findNeighboursByName(starName, k);
 
-        } catch(Exception e) {
-          e.printStackTrace();
-          System.out.println("2 arg naive");
+        } catch (IllegalArgumentException e) {
+          System.out.println("Star not found.");
         }
       } else {
+        // If name is not supplied, then user wishes to call
         if (arguments.length == 5) {
           try {
             int k = Integer.parseInt(arguments[1]);
@@ -153,29 +167,26 @@ public final class Main {
             Double y = Double.parseDouble(arguments[3]);
             Double z = Double.parseDouble(arguments[4]);
             res = this.stars.findNeighboursByCoordinates(k, x, y, z, this.stars.records);
-          } catch(Exception e) {
+          } catch (Exception e) {
             e.printStackTrace();
           }
         }
       }
-      if (res != null){
+      if (res != null) {
         System.out.println("Results:");
         boolean empty = true;
-        for (Star star : res){
-          if (star != null){
+        for (Star star : res) {
+          if (star != null) {
             empty = false;
             System.out.println(star.toString());
           }
         }
-        if (empty){
+        if (empty) {
           System.out.println("No stars found.");
         }
       }
-
     }
-
   }
-
 
 
   private static String processAdd(String str1, String str2) {
@@ -185,10 +196,10 @@ public final class Main {
     try {
       dbl1 = Double.parseDouble(str1);
       dbl2 = Double.parseDouble(str2);
-      } catch (Exception e) {
-        throw new IllegalArgumentException("weewoo");
-        // e.printStackTrace();
-      }
+    } catch (Exception e) {
+      throw new IllegalArgumentException("Could not parse arguments supplied to add as doubles.");
+      // e.printStackTrace();
+    }
     Double res = mb.add(dbl1, dbl2);
     return Double.toString(res);
   }
@@ -200,10 +211,10 @@ public final class Main {
     try {
       dbl1 = Double.parseDouble(str1);
       dbl2 = Double.parseDouble(str2);
-      } catch (Exception e) {
-        throw new IllegalArgumentException("weewoo");
-        // e.printStackTrace();
-      }
+    } catch (Exception e) {
+      throw new IllegalArgumentException("Could not parse arguments supplied to subtract as doubles.");
+      // e.printStackTrace();
+    }
     Double res = mb.subtract(dbl1, dbl2);
     return Double.toString(res);
   }
@@ -277,29 +288,29 @@ public final class Main {
     }
   }
 
+  /**
+   * StarList is used to maintain a collection of stars. Contains the following fields:
+   * - records: an ArrayList of stars
+   * - nameMap: a HashMap which maps the names of stars to the star
+   */
   private class StarList {
 
     ArrayList<Star> records;
     HashMap<String, Star> nameMap;
 
-    public StarList(String filename){
+    public StarList(String filename) {
       this.records = new ArrayList<Star>();
       this.nameMap = new HashMap<String, Star>();
       loadStars(filename);
     }
 
-    /**
-     *
-     * @param starName
-     * @param k
-     * @return
-     */
-    private Star[] findNeighboursByName(String starName, int k){
+    private Star[] findNeighboursByName(String starName, int k) {
       Star findStar = this.nameMap.get(starName);
 
-      if (findStar == null){
+      if (findStar == null) {
         throw new IllegalArgumentException("Star not found.");
       }
+
       Double x = findStar.getX();
       Double y = findStar.getY();
       Double z = findStar.getZ();
@@ -309,43 +320,44 @@ public final class Main {
       return findNeighboursByCoordinates(k, x, y, z, searchArray);
     }
 
-    private Star[] findNeighboursByCoordinates(int k, Double x, Double y, Double z, ArrayList<Star> searchRecords){
+    private Star[] findNeighboursByCoordinates(int k, Double x, Double y, Double z,
+                                               ArrayList<Star> searchRecords) {
 
       Double currMin = Double.MAX_VALUE;
       Star[] result = new Star[k];
       Double[] resultDistances = new Double[k];
-      for (int idx = 0; idx < resultDistances.length; idx++){
+      for (int idx = 0; idx < resultDistances.length; idx++) {
         resultDistances[idx] = Double.MAX_VALUE;
       }
 
-      for (Star otherStar : searchRecords){
-        Double currDistance = getDistance(x, y, z, otherStar.getX(), otherStar.getY(), otherStar.getZ());
+      for (Star otherStar : searchRecords) {
+        Double currDistance =
+            getDistance(x, y, z, otherStar.getX(), otherStar.getY(), otherStar.getZ());
 
 
-
-        if (currDistance < currMin){
+        if (currDistance < currMin) {
           int insertIndex = -1;
-          for (int i = 0; i < k; i++){
-            if (currDistance < resultDistances[i]){
+          for (int i = 0; i < k; i++) {
+            if (currDistance < resultDistances[i]) {
               insertIndex = i;
               break;
             }
           }
 
-          for (int j = k - 1; j > insertIndex; j--){
-            result[j] = result[j-1];
-            resultDistances[j] = resultDistances[j-1];
+          for (int j = k - 1; j > insertIndex; j--) {
+            result[j] = result[j - 1];
+            resultDistances[j] = resultDistances[j - 1];
           }
 
           resultDistances[insertIndex] = currDistance;
           result[insertIndex] = otherStar;
-          currMin = resultDistances[resultDistances.length-1];
+          currMin = resultDistances[resultDistances.length - 1];
         }
       }
       return result;
     }
 
-    private void loadStars(String filename){
+    private void loadStars(String filename) {
 
       try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
         String line;
@@ -354,26 +366,28 @@ public final class Main {
         String header = br.readLine();
         String[] fileHeaders = header.split(",");
         String[] correctHeader = {
-          "StarID",
-          "ProperName",
-          "X",
-          "Y",
-          "Z"
+            "StarID",
+            "ProperName",
+            "X",
+            "Y",
+            "Z"
         };
 
-        if (fileHeaders.length != 5){
+        if (fileHeaders.length != 5) {
           throw new IllegalArgumentException("Input file does not have 5 columns.");
         }
         for (int i = 0; i < fileHeaders.length; i++) {
-          if (!fileHeaders[i].equals(correctHeader[i])){
-            throw new IllegalArgumentException("Input file has " + fileHeaders[i] + " column but expected "+ correctHeader[i] + "instead.");
+          if (!fileHeaders[i].equals(correctHeader[i])) {
+            throw new IllegalArgumentException(
+                "Input file has " + fileHeaders[i] + " column but expected " + correctHeader[i] +
+                    "instead.");
           }
         }
 
         while ((line = br.readLine()) != null) {
           String[] values = line.split(",");
 
-          if (values.length != 5){
+          if (values.length != 5) {
             System.out.println("Bad row.");
             continue;
           }
@@ -382,22 +396,28 @@ public final class Main {
           this.nameMap.put(currStar.getStarName(), currStar);
         }
         this.records = records;
-      } catch (FileNotFoundException e){
+      } catch (FileNotFoundException e) {
         System.out.println("File Not Found.");
-      } catch (IOException e){
+      } catch (IOException e) {
         System.out.println("IO Exception.");
-      } catch (Exception e){
+      } catch (Exception e) {
         e.printStackTrace();
       }
     }
 
-    public Double getDistance(Double x1, Double y1, Double z1, Double x2, Double y2, Double z2){
+    public Double getDistance(Double x1, Double y1, Double z1, Double x2, Double y2, Double z2) {
       return Math.sqrt(Math.pow(x1 - x2, 2) +
-        Math.pow(y1 - y2, 2) +
-        Math.pow(z1 - z2, 2));
+          Math.pow(y1 - y2, 2) +
+          Math.pow(z1 - z2, 2));
     }
   }
 
+  /**
+   * The Star class represents a star and contains fields which record:
+   * - the star's id
+   * - the star's name
+   * - the star's x, y, and z coordinates
+   */
   private class Star {
     int starID;
     String starName;
@@ -405,46 +425,45 @@ public final class Main {
     Double y_coord;
     Double z_coord;
 
-    public Star(String rawStarID, String rawStarName, String rawX, String rawY, String rawZ){
+    public Star(String rawStarID, String rawStarName, String rawX, String rawY, String rawZ) {
       try {
         this.starID = Integer.parseInt(rawStarID);
         this.x_coord = Double.parseDouble(rawX);
         this.y_coord = Double.parseDouble(rawY);
         this.z_coord = Double.parseDouble(rawZ);
-        if (rawStarName.length() == 0){
+        if (rawStarName.length() == 0) {
           this.starName = "<no name>";
         } else {
           this.starName = rawStarName;
         }
-        System.out.println(this.starName);
-      } catch (NumberFormatException e){
+      } catch (NumberFormatException e) {
         System.out.println("Number format exception.");
       }
     }
 
-    public String getStarName(){
+    public String getStarName() {
       return this.starName;
     }
 
-    public Double getX(){
+    public Double getX() {
       return this.x_coord;
     }
 
-    public Double getY(){
+    public Double getY() {
       return this.y_coord;
     }
 
-    public Double getZ(){
+    public Double getZ() {
       return this.z_coord;
     }
 
     @Override
     public String toString() {
       return String.format("Star ID: " + this.starID +
-        " Star Name: " + this.starName +
-        " X: " + this.x_coord +
-        " Y: " + this.y_coord +
-        " Z: " + this.z_coord);
+          " Star Name: " + this.starName +
+          " X: " + this.x_coord +
+          " Y: " + this.y_coord +
+          " Z: " + this.z_coord);
     }
   }
 }
